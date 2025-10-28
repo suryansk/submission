@@ -125,17 +125,10 @@ C# Training Project Bank
 4. Audit Fields: Created/Updated timestamps
 
 7.3 SECURITY CONSIDERATIONS
-1. Role-Based Access: Granular permission system with bank-specific roles
+1. Role-Based Access: CRUD permission system with bank-specific roles
 2. JWT Tokens: Secure authentication with multi-bank permissions
 3. Data Validation: Input validation and sanitization
 4. Audit Logging: Transaction and operation logging
 5. Cross-Bank Access Control: Limited permissions for BankUsers across 
    different banks
-
-8. FUTURE ENHANCEMENTS
-1. External Bank Integration: API connections to real banks
-2. Mobile Application: Native mobile apps
-3. Reporting System: Advanced financial reports
-4. Compliance Module: Regulatory compliance features
-5. Notification System: Real-time alerts and notifications
 
