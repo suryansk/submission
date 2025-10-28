@@ -1,0 +1,141 @@
+C# Training Project Bank 
+
+1. Multi-bank support with branch management
+2. Multiple account types (Savings, Current, Term Deposits)
+3. Multi-currency support with internal conversion
+4. Role-based access control
+5. Minor account management with guardian relationships
+6. Power of Attorney support
+7. JWT-based authentication
+8. RESTful API endpoints
+
+3. ENTITY RELATIONSHIPS
+
+3.1 USER HIERARCHY
+1. User (Abstract Base Class)
+2. NormalUser
+   - Can be Guardian for minors
+   - Can be Minor (age < 18)
+   - Can have POA relationships
+3. BankUser
+   - Primary employee of one bank
+   - Can have limited access to multiple banks
+   - Access controlled through bank-specific roles
+
+3.2 ACCOUNT HIERARCHY
+1. Account (Abstract Base Class)
+2. SavingAccount
+   - Interest rate
+   - Withdrawal limits
+   - Monthly withdrawal restrictions
+3. CurrentAccount
+   - Overdraft facility
+   - Overdraft interest rates
+4. TermDepositAccount (extends SavingAccount)
+   - Maturity date
+   - Term duration
+   - Maturity interest rate
+   - Auto-renewal option
+
+4. CORE ENTITIES
+
+4.1 USER MANAGEMENT
+1. User: Abstract base class for all users
+2. NormalUser: Regular bank customers
+3. BankUser: Bank employees with primary bank and limited multi-bank access
+4. GuardianRelationship: Links guardians with minor users
+
+4.2 ACCOUNT MANAGEMENT
+1. Account: Abstract base for all account types
+2. SavingAccount: Basic savings with interest
+3. CurrentAccount: Business accounts with overdraft
+4. TermDepositAccount: Fixed-term deposits
+
+4.3 BANKING INFRASTRUCTURE
+1. Bank: Banking institutions
+2. Branch: Bank branches
+3. Currency: Supported currencies with exchange rates
+4. Transaction: All financial transactions
+
+4.4 SECURITY & PERMISSIONS
+1. Role: User roles in the system
+2. Permission: Specific permissions
+3. UserRole: User-role assignments (bank-specific for BankUsers)
+4. RolePermission: Role-permission mappings
+5. PowerOfAttorney: POA relationships
+
+5. BUSINESS RULES
+
+5.1 ACCOUNT OPERATIONS
+1. Withdrawal Limits: Based on account type and user role
+2. Currency Conversion: Internal validation and conversion
+3. Minor Accounts: Require guardian approval for operations
+4. POA Operations: Limited based on granted permissions
+
+5.2 USER MANAGEMENT
+1. Minor Conversion: Automatic conversion to regular account at age 18
+2. Multi-Bank Access: Users can have accounts in multiple banks
+3. Role Assignment: Users can have different roles per bank
+4. Bank User Access: BankUsers have primary bank employment and limited 
+   access to other banks through specific roles
+
+5.3 TRANSACTION PROCESSING
+1. Balance Validation: Ensure sufficient funds
+2. Currency Conversion: Real-time conversion with validation
+3. Audit Trail: Complete transaction history
+4. Status Tracking: Transaction lifecycle management
+
+5.4 BANK USER LIMITATIONS
+1. Primary Bank: Full access as employee
+2. Secondary Banks: Limited access based on assigned roles
+3. Cross-Bank Operations: Restricted to specific permissions
+4. Data Access: Limited to authorized accounts and transactions
+
+6. API ENDPOINTS
+
+6.1 USER MANAGEMENT (/user)
+1. CREATE: Limited - Role-based restrictions
+2. UPDATE: Limited - Self or authorized users only
+3. DELETE: Limited - Admin/Bank user only
+4. READ: Unlimited - Public profile information
+
+6.2 ACCOUNT MANAGEMENT (/accounts)
+1. CREATE: Account opening with validations
+2. UPDATE: Account details modification
+3. DELETE: Account closure (limited conditions)
+4. READ: Limited - Owner/POA/Guardian/Authorized BankUser access only
+
+6.3 AUTHENTICATION (/login)
+1. JWT Token: Contains all user roles and permissions
+2. Multi-Role Support: Single token for all user roles
+3. Bank-Specific Roles: Role assignments per bank for BankUsers
+
+7. TECHNICAL IMPLEMENTATION
+
+7.1 TECHNOLOGY STACK
+1. .NET: Backend framework
+2. SQL Server: Database
+3. Entity Framework: ORM
+4. JWT: Authentication tokens
+
+7.2 DATABASE DESIGN
+1. Inheritance: Table-per-hierarchy for User and Account entities
+2. Relationships: Proper foreign key constraints
+3. Indexing: Performance optimization on key fields
+4. Audit Fields: Created/Updated timestamps
+
+7.3 SECURITY CONSIDERATIONS
+1. Role-Based Access: Granular permission system with bank-specific roles
+2. JWT Tokens: Secure authentication with multi-bank permissions
+3. Data Validation: Input validation and sanitization
+4. Audit Logging: Transaction and operation logging
+5. Cross-Bank Access Control: Limited permissions for BankUsers across 
+   different banks
+
+8. FUTURE ENHANCEMENTS
+1. External Bank Integration: API connections to real banks
+2. Mobile Application: Native mobile apps
+3. Reporting System: Advanced financial reports
+4. Compliance Module: Regulatory compliance features
+5. Notification System: Real-time alerts and notifications
+
