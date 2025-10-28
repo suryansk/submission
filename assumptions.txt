@@ -1,0 +1,240 @@
+Assumption Made
+
+General Assumptions:
+1. System is designed for Indian banking sector only
+2. Base currency for all exchange rates is INR (Indian Rupee)
+3. System uses .NET with Entity Framework and SQL Server
+4. JWT authentication handles all user roles and permissions
+5. All phone numbers follow Indian format validation
+6. All postal codes follow Indian 6-digit format
+
+User Management Assumptions:
+1. User Identification:
+   - Email is the primary unique identifier for login
+   - No separate username field required
+   - Identification number covers all ID types (Aadhaar, PAN, Passport) which is for validations
+
+2. Age Calculation:
+   - Minor status calculated using simple year difference (age < 18)
+   - No precise month/day calculation for age determination
+   - Automatic account conversion happens at 18th birthday
+
+3. Address Management:
+   - Single address field sufficient (no separate billing/mailing)
+   - Minimum 10 characters required for meaningful address
+   - Maximum 500 characters for complete address
+
+4. Name Validation:
+   - First and last names minimum 2 characters each
+   - Maximum 100 characters for names
+   - No special character restrictions beyond standard validation
+
+5. Bank User Employment:
+   - Bank users have one primary bank employment
+   - Multi-bank access managed through role assignments
+   - Employee ID must be unique within each bank
+   - Department and designation are free-text fields
+
+
+Account Management Assumptions:
+1. Account Numbers:
+   - 10-20 character alphanumeric account numbers
+   - Bank generates unique account numbers
+   - No specific format validation required
+
+2. Account Types:
+   - Term Deposits inherit from Savings Accounts
+   - Current Accounts support overdraft facilities
+   - NRI accounts can be of any type with currency support
+
+3. Balance Limitations:
+   - Maximum account balance: 999,999,999,999,999.99
+   - Minimum balance can be 0 for some account types
+   - Overdraft allows negative balances in current accounts
+
+4. Interest Rates:
+   - Maximum interest rate: 50% per annum
+   - Interest rates stored as decimal percentages
+   - Different rates for regular and maturity interests
+
+
+
+
+
+
+
+
+Banking  Assumptions:
+1. Bank Codes:
+   - 2-20 character bank codes (alphanumeric)
+   - SWIFT codes follow international standards (8-11 characters)
+   - Bank codes must be unique system-wide
+
+2. Branch Management:
+   - Each branch belongs to exactly one bank
+   - Branch codes unique within each bank
+   - 3-20 character branch codes supported
+
+3. Multi-Currency Support:
+   - All currencies have exchange rates to INR
+   - Exchange rates updated manually or via external service
+   - Currency codes follow ISO 4217 standards (3 uppercase letters)
+   - Maximum exchange rate: 999,999 to handle extreme variations
+
+
+Transaction Assumptions:
+1. Transaction Types:
+   - Free-text transaction types (DEPOSIT, WITHDRAWAL, TRANSFER, etc.)
+   - Minimum transaction amount: 0.01
+   - Maximum transaction amount: 999,999,999,999,999.99
+
+2. Reference Numbers:
+   - 5-50 character unique reference numbers
+   - System or bank generates reference numbers
+   - No specific format requirements
+
+3. Currency Conversion:
+   - Internal conversion using stored exchange rates
+   - Original currency and amount tracked for audit
+   - Exchange rates accurate to 6 decimal places
+
+4. Transaction Status:
+   - Text-based status tracking (PENDING, COMPLETED, FAILED, CANCELLED)
+   - Status transitions managed by business logic
+   - No workflow state machine implemented
+
+5. Balance Tracking:
+   - Balance after transaction stored for audit purposes
+   - Negative balances allowed for overdraft accounts
+   - No automatic balance calculation validation
+
+
+Security and Role Assumptions:
+1. Role-Based Access Control:
+   - Roles can be bank-specific or system-wide
+   - Account-specific roles supported (POA, Guardian)
+   - Role names are free-text with 2-50 character limit
+
+2. Permission System:
+   - Permissions organized by modules (USER, ACCOUNT, TRANSACTION)
+   - Permission names descriptive and human-readable
+   - No hierarchical permission inheritance
+
+3. User Role Assignments:
+   - Users can have multiple roles across different banks
+   - Role assignments can have expiry dates
+   - Role activation/deactivation without deletion
+
+4. Guardian Relationships:
+   - Multiple guardians per minor allowed
+   - One guardian can manage multiple minors
+   - Relationship types are free-text (PARENT, LEGAL_GUARDIAN)
+   - Automatic expiry when minor turns 18
+
+5. Power of Attorney:
+   - One POA relationship per account supported
+   - POA can have limitation descriptions
+   - POA can have expiry dates
+   - POA users must be different from account holders
+
+
+Business Assumptions:
+1. Account Operations:
+   - Withdrawal limits enforced at application level
+   - Currency conversion happens during transaction processing
+   - Minimum balance violations handled as business rules
+
+2. Minor Account Management:
+   - Guardian approval required for all minor transactions
+   - Automatic account type conversion at age 18
+   - Guardian relationship remains for audit purposes
+
+3. Multi-Bank Operations:
+   - Users can transfer between accounts in different banks
+   - Bank-specific rules applied based on account location
+   - Cross-bank operations logged for compliance
+
+4. Term Deposit Handling:
+   - Maturity date calculated from term duration
+   - Auto-renewal settings respected at maturity
+   - Premature withdrawal penalties not implemented
+
+5. NRI Account Support:
+   - Multi-currency support for NRI accounts
+   - Exchange rate conversion for all transactions
+   - Compliance reporting not included in scope
+
+
+Data Validation Assumptions:
+1. String Lengths:
+   - Names: 2-100 characters
+   - Codes: Based on industry standards
+   - Addresses: 10-500 characters for completeness
+   - Descriptions: Up to 500 characters for detailed information
+
+2. Numeric Ranges:
+   - IDs: Positive integers only
+   - Financial amounts: Support for very large numbers
+   - Interest rates: 0-50% range
+   - Exchange rates: 0.000001-999,999 range
+
+3. Date Validations:
+   - Required dates must be specified
+   - Future dates allowed for maturity/expiry
+   - No business rule date validations at entity level
+
+4. Regular Expressions:
+   - Indian phone numbers: (+91|91|0)?[6-9]xxxxxxxxx
+   - Indian postal codes: [1-9][0-9]{5}
+   - Currency codes: [A-Z]{3}
+
+5. Business Logic Validations:
+   - Handled at service/business layer, not entity level
+   - Entity validations focus on data integrity only
+   - Complex business rules implemented separately
+
+
+Technical Assumptions:
+1. Database Design:
+   - Table-per-hierarchy inheritance for User and Account
+   - Foreign key constraints enforced at database level
+   - Soft deletes using IsActive flags
+
+2. Entity Framework:
+   - Virtual navigation properties for lazy loading
+   - Collection initialization in constructors
+   - Decimal precision specified for financial data
+
+3. Error Handling:
+   - Validation errors returned to client
+   - Business rule violations handled separately
+   - Database constraint violations caught and translated
+
+5. Audit and Logging:
+   - Created/Updated timestamps at entity level
+   - Transaction audit through transaction history
+   - User action logging not implemented at entity level
+
+
+Integration Assumptions:
+1. External Services:
+   - Exchange rate updates from external API
+   - SMS/Email notifications not included
+   - Payment gateway integration not included
+
+2. API Design:
+   - RESTful endpoints for all operations
+   - JWT tokens contain all necessary permissions
+   - Rate limiting not implemented
+
+3. Third-Party Systems:
+   - No integration with actual banking systems
+   - No real-time payment processing
+   - No regulatory reporting interfaces
+
+4. Mobile Support:
+   - API designed to support mobile applications
+   - No mobile-specific optimizations
+   - Offline capability not supported
+
+
