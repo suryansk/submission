@@ -185,7 +185,7 @@ namespace WebApplication2.Controllers
         }
         
         /// <summary>
-        /// Close account (ADMIN ONLY - 403 for ViewOnly users and regular users)
+        /// Close account (ADMIN ONLY - sets IsActive to false)
         /// </summary>
         /// <param name="id">Account ID to close</param>
         /// <returns>Account closure confirmation</returns>
@@ -193,7 +193,7 @@ namespace WebApplication2.Controllers
         /// <response code="401">Unauthorized - token required</response>
         /// <response code="403">Forbidden - Admin privileges required</response>
         /// <response code="404">Account not found</response>
-        [HttpDelete("{id}")]
+        [HttpPut("{id}/close")]
         [RequireAdmin]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -213,6 +213,43 @@ namespace WebApplication2.Controllers
             await _context.SaveChangesAsync();
             
             return Ok(new { success = true, message = "Account closed successfully", accountId = id });
+        }
+        
+        /// <summary>
+        /// Delete account (ADMIN ONLY - 403 for ViewOnly users and regular users, only when IsActive is false)
+        /// </summary>
+        /// <param name="id">Account ID to delete</param>
+        /// <returns>Account deletion confirmation</returns>
+        /// <response code="200">Account deleted successfully</response>
+        /// <response code="400">Account must be inactive before deletion</response>
+        /// <response code="401">Unauthorized - token required</response>
+        /// <response code="403">Forbidden - Admin privileges required</response>
+        /// <response code="404">Account not found</response>
+        [HttpDelete("{id}")]
+        [RequireAdmin]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteAccount(int id)
+        {
+            var account = await _context.Accounts.FindAsync(id);
+            if (account == null)
+            {
+                return NotFound(new { success = false, message = "Account not found" });
+            }
+            
+            // Only allow deletion if account is already inactive
+            if (account.IsActive)
+            {
+                return BadRequest(new { success = false, message = "Account must be inactive before deletion. Please close the account first." });
+            }
+            
+            _context.Accounts.Remove(account);
+            await _context.SaveChangesAsync();
+            
+            return Ok(new { success = true, message = "Account deleted successfully", accountId = id });
         }
     }
     

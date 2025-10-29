@@ -129,17 +129,50 @@ namespace WebApplication2.Controllers
         }
         
         /// <summary>
-        /// Delete user (ADMIN ONLY - 403 for ViewOnly users and regular users)
+        /// Deactivate user (ADMIN ONLY - sets IsActive to false)
+        /// </summary>
+        /// <param name="id">User ID to deactivate</param>
+        /// <returns>Deactivation confirmation</returns>
+        /// <response code="200">User deactivated successfully</response>
+        /// <response code="401">Unauthorized - token required</response>
+        /// <response code="403">Forbidden - Admin privileges required</response>
+        /// <response code="404">User not found</response>
+        [HttpPut("{id}/deactivate")]
+        [RequireAdmin]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeactivateUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound(new { success = false, message = "User not found" });
+            }
+            
+            user.IsActive = false;
+            user.UpdatedAt = DateTime.UtcNow;
+            
+            await _context.SaveChangesAsync();
+            
+            return Ok(new { success = true, message = "User deactivated successfully", userId = id });
+        }
+        
+        /// <summary>
+        /// Delete user (ADMIN ONLY - 403 for ViewOnly users and regular users, only when IsActive is false)
         /// </summary>
         /// <param name="id">User ID to delete</param>
         /// <returns>Deletion confirmation</returns>
         /// <response code="200">User deleted successfully</response>
+        /// <response code="400">User must be inactive before deletion</response>
         /// <response code="401">Unauthorized - token required</response>
         /// <response code="403">Forbidden - Admin privileges required</response>
         /// <response code="404">User not found</response>
         [HttpDelete("{id}")]
         [RequireAdmin]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -151,10 +184,13 @@ namespace WebApplication2.Controllers
                 return NotFound(new { success = false, message = "User not found" });
             }
             
-            // Soft delete
-            user.IsActive = false;
-            user.UpdatedAt = DateTime.UtcNow;
+            // Only allow deletion if user is already inactive
+            if (user.IsActive)
+            {
+                return BadRequest(new { success = false, message = "User must be inactive before deletion. Please deactivate the user first." });
+            }
             
+            _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             
             return Ok(new { success = true, message = "User deleted successfully", userId = id });
